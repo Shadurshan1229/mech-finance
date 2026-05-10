@@ -1,0 +1,98 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Poppins:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@import "tailwindcss";
+@config "../../tailwind.config.js";
+
+@layer base {
+  /* shadcn CSS vars remapped to MECH DS tokens */
+  :root {
+    --background:             #F9F2EE;
+    --foreground:             #1D1A19;
+    --card:                   #F1E7E2;
+    --card-foreground:        #1D1A19;
+    --popover:                #F9F2EE;
+    --popover-foreground:     #1D1A19;
+    --primary:                #FF5B24;
+    --primary-foreground:     #F9F2EE;
+    --secondary:              #F1E7E2;
+    --secondary-foreground:   #1D1A19;
+    --muted:                  #F1E7E2;
+    --muted-foreground:       #8C7D76;
+    --accent:                 #F1E7E2;
+    --accent-foreground:      #1D1A19;
+    --destructive:            #E74C3C;
+    --destructive-foreground: #F9F2EE;
+    --border:                 #D4C8C2;
+    --input:                  #D4C8C2;
+    --ring:                   #FF5B24;
+    --radius:                 0px;
+  }
+
+  /* Kill all rounding — MECH DS sharp geometry rule */
+  *, *::before, *::after {
+    border-radius: 0 !important;
+  }
+
+  /* Toggle/Switch exception — only allowed rounded component */
+  [data-slot="switch-thumb"],
+  [data-slot="switch"] {
+    border-radius: 9999px !important;
+  }
+
+  /* Base typography */
+  body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #F9F2EE;
+    color: #1D1A19;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Interactive elements → Space Grotesk */
+  h1, h2, h3, h4, h5, h6,
+  button, label, nav a, th,
+  [role="tab"], [role="menuitem"] {
+    font-family: 'Space Grotesk', sans-serif;
+  }
+
+  /* All data numbers → JetBrains Mono */
+  .mono,
+  [data-amount],
+  [data-value],
+  td.numeric,
+  .tabular-nums {
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* No box shadows — flat surface rule */
+  * {
+    box-shadow: none !important;
+  }
+
+  /* Focus ring exception — signal only */
+  *:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(255, 91, 36, 0.30) !important;
+  }
+}
+
+/* shadcn component shadow patches */
+@layer components {
+  /* Kill shadows on all shadcn overlays */
+  [data-slot="dialog-content"],
+  [data-slot="dropdown-menu-content"],
+  [data-slot="select-content"],
+  [data-slot="tooltip-content"],
+  [data-slot="popover-content"],
+  [data-slot="sheet-content"],
+  [data-slot="toast"] {
+    box-shadow: none !important;
+    border: 1px solid #D4C8C2;
+  }
+
+  /* Progress bar — no rounding */
+  [data-slot="progress"],
+  [data-slot="progress-indicator"] {
+    border-radius: 0 !important;
+  }
+}
