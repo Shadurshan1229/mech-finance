@@ -13,6 +13,7 @@ import Recurring from '@/pages/Recurring'
 import Portfolio from '@/pages/Portfolio'
 import PortfolioAssetDetail from '@/pages/PortfolioAssetDetail'
 import PortfolioLiabilityDetail from '@/pages/PortfolioLiabilityDetail'
+import Transfers from '@/pages/Transfers'
 import Settings from '@/pages/Settings'
 
 /** App router — protected routes nested under AppLayout (Shell), auth route standalone. */
@@ -28,6 +29,7 @@ export const router = createBrowserRouter([
       { path: '/accounts/:id',              element: <AccountDetail /> },
       { path: '/credit-cards',             element: <CreditCards /> },
       { path: '/credits-debts',            element: <CreditsDebts /> },
+      { path: '/transfers',                element: <Transfers /> },
       { path: '/goals',                     element: <Goals /> },
       { path: '/recurring',                 element: <Recurring /> },
       { path: '/portfolio',                 element: <Portfolio /> },

@@ -33,6 +33,7 @@ export const NAV_GROUPS = [
       { label: 'Accounts', path: '/accounts', icon: 'wallet' },
       { label: 'Credit Cards', path: '/credit-cards', icon: 'credit-card' },
       { label: 'Credits & Debts', path: '/credits-debts', icon: 'handshake' },
+      { label: 'Transfers',       path: '/transfers',     icon: 'arrow-right-left' },
     ],
   },
   {

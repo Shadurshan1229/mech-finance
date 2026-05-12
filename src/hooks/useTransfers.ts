@@ -1,6 +1,7 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { useAppStore } from '@/store/useAppStore'
+import type { TransferWithRefs } from '@/types'
 
 type TransferInput = {
   amount:          number
@@ -89,4 +90,32 @@ export function useTransfers() {
     payCard,
     fundGoal,
   }
+}
+
+/** Query hook — fetches all transfers for the current user, newest first, with joined names. */
+export function useTransferHistory() {
+  const userId = useAppStore((s) => s.user?.id)
+
+  const { data, isLoading } = useQuery({
+    queryKey: ['transfers', userId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('transfers')
+        .select(`
+          *,
+          from_account:from_account_id(id, name, type),
+          to_account:to_account_id(id, name, type),
+          to_card:to_card_id(id, name),
+          to_goal:to_goal_id(id, name)
+        `)
+        .eq('user_id', userId!)
+        .order('date', { ascending: false })
+        .order('created_at', { ascending: false })
+      if (error) throw error
+      return (data ?? []) as TransferWithRefs[]
+    },
+    enabled: !!userId,
+  })
+
+  return { transfers: data ?? [], isLoading }
 }

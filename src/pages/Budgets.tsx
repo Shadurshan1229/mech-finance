@@ -6,8 +6,8 @@ import { toast } from 'sonner'
 import PageHeader from '@/components/layout/PageHeader'
 import { Switch } from '@/components/ui/switch'
 import {
-  Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose,
-} from '@/components/ui/sheet'
+  Dialog, DialogContent, DialogHeader, DialogTitle,
+} from '@/components/ui/dialog'
 import { useBudgets, fetchExpenseCategories } from '@/hooks/useBudgets'
 import { useAppStore } from '@/store/useAppStore'
 import { formatCurrency, computeBudgetRemaining, getMonthLabel } from '@/lib/utils'
@@ -17,7 +17,7 @@ import type { Category } from '@/types'
 /** Budgets page — monthly budget vs actual spend with Nothing OS segment progress bar. */
 export default function Budgets() {
   const [month, setMonth] = useState(() => startOfMonth(new Date()))
-  const [sheetOpen, setSheetOpen] = useState(false)
+  const [dialogOpen, setDialogOpen] = useState(false)
 
   const { budgets, totalBudgeted, totalSpent, totalRemaining, isLoading, copyFromLastMonth } = useBudgets(month)
 
@@ -47,7 +47,7 @@ export default function Budgets() {
               Copy Last Month
             </button>
             <button
-              onClick={() => setSheetOpen(true)}
+              onClick={() => setDialogOpen(true)}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 font-grotesk text-xs bg-mech-dark text-mech-paper border border-mech-dark hover:bg-mech-ink-80 transition-colors duration-fast"
             >
               <Settings2 size={12} strokeWidth={1.5} />
@@ -84,11 +84,7 @@ export default function Budgets() {
         <div className="grid grid-cols-3 border border-mech-ink-20 mb-6">
           <SummaryCell label="BUDGETED" value={totalBudgeted} />
           <SummaryCell label="SPENT" value={totalSpent} highlight />
-          <SummaryCell
-            label="REMAINING"
-            value={totalRemaining}
-            signal={totalRemaining < 0}
-          />
+          <SummaryCell label="REMAINING" value={totalRemaining} signal={totalRemaining < 0} />
         </div>
       )}
 
@@ -100,7 +96,7 @@ export default function Budgets() {
             No budgets set for {getMonthLabel(month)}.
           </p>
           <button
-            onClick={() => setSheetOpen(true)}
+            onClick={() => setDialogOpen(true)}
             className="inline-flex items-center gap-1.5 px-4 py-2 font-grotesk text-sm bg-mech-dark text-mech-paper border border-mech-dark hover:bg-mech-ink-80 transition-colors duration-fast"
           >
             <Settings2 size={14} strokeWidth={1.5} />
@@ -108,16 +104,16 @@ export default function Budgets() {
           </button>
         </div>
       ) : (
-        <div className="flex flex-col gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {budgets.map((b) => (
             <BudgetRow key={b.id} budget={b} />
           ))}
         </div>
       )}
 
-      <SetBudgetsSheet
-        open={sheetOpen}
-        onOpenChange={setSheetOpen}
+      <SetBudgetsDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
         month={month}
       />
     </div>
@@ -168,37 +164,33 @@ function BudgetRow({ budget }: { budget: BudgetRowData }) {
           />
           <span className="font-grotesk text-sm text-mech-dark">{budget.category?.name ?? 'Unknown'}</span>
         </div>
-        <div className="flex items-center gap-4">
-          <span className="font-mono text-xs text-mech-ink-50">
-            {formatCurrency(spent)} / {formatCurrency(amount)}
-          </span>
-          <span className={cn('font-mono text-xs', isOver ? 'text-mech-signal-red' : 'text-mech-dark')}>
-            {isOver ? `−${formatCurrency(Math.abs(remaining))} over` : formatCurrency(remaining)}
-          </span>
-        </div>
+        <span className={cn('font-mono text-xs', isOver ? 'text-mech-signal-red' : 'text-mech-ink-50')}>
+          {isOver ? `−${formatCurrency(Math.abs(remaining))} over` : formatCurrency(remaining)}
+        </span>
       </div>
 
-      {/* Nothing OS segment bar */}
-      <div className="flex gap-px h-1.5">
+      <div className="flex gap-px h-1.5 mb-1.5">
         {Array.from({ length: segments }).map((_, i) => (
           <div
             key={i}
             style={{
               flex: 1,
               borderRadius: 0,
-              background: i < filled
-                ? (isOver ? '#E74C3C' : '#FF5B24')
-                : '#D4C8C2',
+              background: i < filled ? (isOver ? '#E74C3C' : '#FF5B24') : '#D4C8C2',
             }}
           />
         ))}
+      </div>
+
+      <div className="font-mono text-xs text-mech-ink-50">
+        {formatCurrency(spent)} spent of {formatCurrency(amount)}
       </div>
     </div>
   )
 }
 
-/** Right-side sheet for setting budgets per expense category. */
-function SetBudgetsSheet({
+/** Center modal for setting budgets per expense category. */
+function SetBudgetsDialog({
   open, onOpenChange, month,
 }: {
   open: boolean
@@ -221,18 +213,15 @@ function SetBudgetsSheet({
   }, [open, userId])
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent
-        side="right"
-        className="w-full sm:max-w-md bg-mech-paper border-l border-mech-ink-20 shadow-none flex flex-col overflow-y-auto"
-      >
-        <SheetHeader className="px-6 pt-6 pb-4 border-b border-mech-ink-20">
-          <SheetTitle className="font-grotesk font-semibold text-base text-mech-dark">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="w-full max-w-[560px] sm:max-w-[560px] ring-0 shadow-none bg-mech-paper border border-mech-ink-20 rounded-none p-0 gap-0 overflow-hidden">
+        <DialogHeader className="px-6 pt-6 pb-4 border-b border-mech-ink-20 flex-shrink-0">
+          <DialogTitle className="font-grotesk font-semibold text-base text-mech-dark">
             Set Budgets — {getMonthLabel(month)}
-          </SheetTitle>
-        </SheetHeader>
+          </DialogTitle>
+        </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto px-6 py-4">
+        <div className="overflow-y-auto max-h-[60vh] px-6 py-4">
           {loadingCats ? (
             <div className="font-poppins text-body-sm text-mech-ink-50 py-4">Loading categories...</div>
           ) : categories.length === 0 ? (
@@ -256,17 +245,16 @@ function SetBudgetsSheet({
           )}
         </div>
 
-        <div className="px-6 py-4 border-t border-mech-ink-20">
-          <SheetClose
-            render={
-              <button className="w-full py-2 font-grotesk text-sm bg-mech-dark text-mech-paper border border-mech-dark hover:bg-mech-ink-80 transition-colors duration-fast" />
-            }
+        <div className="px-6 py-4 border-t border-mech-ink-20 flex-shrink-0">
+          <button
+            onClick={() => onOpenChange(false)}
+            className="w-full py-2 font-grotesk text-sm bg-mech-dark text-mech-paper border border-mech-dark hover:bg-mech-ink-80 transition-colors duration-fast"
           >
             Done
-          </SheetClose>
+          </button>
         </div>
-      </SheetContent>
-    </Sheet>
+      </DialogContent>
+    </Dialog>
   )
 }
 
@@ -347,8 +335,8 @@ function BudgetFormRow({ category, existing, monthKey, onUpsert, onDelete }: Bud
       </div>
 
       <div className="flex items-center gap-2">
-        <div className="flex items-center border border-mech-ink-20 focus-within:border-mech-orange transition-colors duration-instant flex-1">
-          <span className="px-2 font-mono text-xs text-mech-ink-50 border-r border-mech-ink-20 select-none">LKR</span>
+        <div className="flex items-center border border-mech-ink-20 focus-within:border-mech-orange transition-colors duration-instant flex-1 min-w-0">
+          <span className="px-2 py-1.5 font-mono text-xs text-mech-ink-50 border-r border-mech-ink-20 select-none bg-mech-paper-secondary flex-shrink-0">LKR</span>
           <input
             type="number"
             min="0"
@@ -357,7 +345,7 @@ function BudgetFormRow({ category, existing, monthKey, onUpsert, onDelete }: Bud
             onChange={(e) => setAmount(e.target.value)}
             onBlur={handleBlur}
             placeholder="0.00"
-            className="flex-1 px-2 py-1.5 bg-mech-paper font-mono text-sm text-mech-dark focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+            className="flex-1 px-2 py-1.5 bg-mech-paper font-mono text-sm text-mech-dark focus:outline-none min-w-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
           />
         </div>
         <div className="flex items-center gap-1.5 flex-shrink-0">

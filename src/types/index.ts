@@ -199,3 +199,10 @@ export interface BudgetWithCategory extends Budget {
   category?: Category
   spent?: number
 }
+
+export interface TransferWithRefs extends Transfer {
+  from_account?: { id: string; name: string; type: string } | null
+  to_account?: { id: string; name: string; type: string } | null
+  to_card?: { id: string; name: string } | null
+  to_goal?: { id: string; name: string } | null
+}
