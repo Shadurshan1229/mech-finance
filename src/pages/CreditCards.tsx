@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { toast } from 'sonner'
-import { CreditCard as CreditCardIcon, Plus, Edit2, Archive } from 'lucide-react'
+import { CreditCard as CreditCardIcon, Plus, Edit2, Archive, Banknote } from 'lucide-react'
 
 import PageHeader from '@/components/layout/PageHeader'
 import AmountDisplay from '@/components/shared/AmountDisplay'
@@ -11,6 +11,7 @@ import StatusBadge from '@/components/shared/StatusBadge'
 import EmptyState from '@/components/shared/EmptyState'
 import FieldTooltip from '@/components/shared/FieldTooltip'
 import ConfirmDialog from '@/components/shared/ConfirmDialog'
+import { PayCardDialog } from '@/components/forms/PayCardDialog'
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog'
@@ -43,10 +44,11 @@ function toOptInt(v: string | undefined): number | undefined {
 export default function CreditCards() {
   const { activeCards, archivedCards, isLoading, createCard, updateCard, archiveCard } = useCreditCards()
 
-  const [dialogOpen, setDialogOpen]       = useState(false)
-  const [editTarget,   setEditTarget]     = useState<CreditCardWithStats | null>(null)
-  const [archiveTarget, setArchiveTarget] = useState<CreditCardWithStats | null>(null)
-  const [showArchived, setShowArchived]   = useState(false)
+  const [dialogOpen, setDialogOpen]         = useState(false)
+  const [editTarget,   setEditTarget]       = useState<CreditCardWithStats | null>(null)
+  const [archiveTarget, setArchiveTarget]   = useState<CreditCardWithStats | null>(null)
+  const [showArchived, setShowArchived]     = useState(false)
+  const [payCardTarget, setPayCardTarget]   = useState<CreditCardWithStats | null>(null)
 
   const form = useForm<CardFormValues>({
     resolver: zodResolver(cardSchema),
@@ -159,6 +161,7 @@ export default function CreditCards() {
               card={card}
               onEdit={() => openEdit(card)}
               onArchive={() => setArchiveTarget(card)}
+              onPayCard={() => setPayCardTarget(card)}
             />
           ))}
         </div>
@@ -325,17 +328,24 @@ export default function CreditCards() {
         onConfirm={handleArchive}
         loading={archiveCard.isPending}
       />
+
+      <PayCardDialog
+        open={!!payCardTarget}
+        onOpenChange={(v) => !v && setPayCardTarget(null)}
+        defaultCardId={payCardTarget?.id}
+      />
     </div>
   )
 }
 
 interface CardComponentProps {
-  card:      CreditCardWithStats
-  onEdit:    () => void
-  onArchive?: () => void
+  card:        CreditCardWithStats
+  onEdit:      () => void
+  onArchive?:  () => void
+  onPayCard?:  () => void
 }
 
-function CardComponent({ card, onEdit, onArchive }: CardComponentProps) {
+function CardComponent({ card, onEdit, onArchive, onPayCard }: CardComponentProps) {
   const today       = new Date()
   const todayDate   = today.getDate()
   const daysUntilDue = card.due_date != null
@@ -426,21 +436,33 @@ function CardComponent({ card, onEdit, onArchive }: CardComponentProps) {
       <hr className="border-0 border-t border-dashed border-mech-ink-20" />
 
       {/* Actions */}
-      <div className="flex items-center justify-end gap-3">
-        <button
-          onClick={onEdit}
-          className="flex items-center gap-1 font-grotesk text-xs text-mech-ink-50 hover:text-mech-dark transition-colors duration-instant"
-        >
-          <Edit2 size={12} strokeWidth={1.5} /> Edit
-        </button>
-        {onArchive && (
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          {onPayCard && (
+            <button
+              onClick={onPayCard}
+              className="flex items-center gap-1 font-grotesk text-xs text-mech-ink-50 hover:text-mech-dark transition-colors duration-instant"
+            >
+              <Banknote size={12} strokeWidth={1.5} /> Pay Card
+            </button>
+          )}
+        </div>
+        <div className="flex items-center gap-3">
           <button
-            onClick={onArchive}
-            className="flex items-center gap-1 font-grotesk text-xs text-mech-ink-50 hover:text-mech-signal-red transition-colors duration-instant"
+            onClick={onEdit}
+            className="flex items-center gap-1 font-grotesk text-xs text-mech-ink-50 hover:text-mech-dark transition-colors duration-instant"
           >
-            <Archive size={12} strokeWidth={1.5} /> Archive
+            <Edit2 size={12} strokeWidth={1.5} /> Edit
           </button>
-        )}
+          {onArchive && (
+            <button
+              onClick={onArchive}
+              className="flex items-center gap-1 font-grotesk text-xs text-mech-ink-50 hover:text-mech-signal-red transition-colors duration-instant"
+            >
+              <Archive size={12} strokeWidth={1.5} /> Archive
+            </button>
+          )}
+        </div>
       </div>
     </div>
   )

@@ -6,6 +6,7 @@ import { toast } from 'sonner'
 import {
   Wallet, Plus, Edit2, Archive, RotateCcw,
   Building2, CreditCard as CardIcon, PiggyBank, Banknote, Landmark, Smartphone, Coins,
+  ArrowDownToLine, ArrowLeftRight,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
@@ -15,6 +16,8 @@ import StatusBadge from '@/components/shared/StatusBadge'
 import EmptyState from '@/components/shared/EmptyState'
 import FieldTooltip from '@/components/shared/FieldTooltip'
 import ConfirmDialog from '@/components/shared/ConfirmDialog'
+import { WithdrawCashDialog } from '@/components/forms/WithdrawCashDialog'
+import { TransferDialog } from '@/components/forms/TransferDialog'
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog'
@@ -69,6 +72,8 @@ export default function Accounts() {
   const [editTarget, setEditTarget]         = useState<AccountWithBalance | null>(null)
   const [archiveTarget, setArchiveTarget]   = useState<AccountWithBalance | null>(null)
   const [showArchived, setShowArchived]     = useState(false)
+  const [withdrawAccount, setWithdrawAccount] = useState<AccountWithBalance | null>(null)
+  const [transferAccount, setTransferAccount] = useState<AccountWithBalance | null>(null)
 
   const form = useForm<AccountFormValues>({
     resolver: zodResolver(accountSchema),
@@ -157,6 +162,8 @@ export default function Accounts() {
               account={account}
               onEdit={() => openEdit(account)}
               onArchive={() => setArchiveTarget(account)}
+              onWithdraw={account.type !== 'cash' ? () => setWithdrawAccount(account) : undefined}
+              onTransfer={() => setTransferAccount(account)}
             />
           ))}
         </div>
@@ -354,17 +361,31 @@ export default function Accounts() {
         onConfirm={handleArchive}
         loading={archiveAccount.isPending}
       />
+
+      <WithdrawCashDialog
+        open={!!withdrawAccount}
+        onOpenChange={(v) => !v && setWithdrawAccount(null)}
+        defaultFromId={withdrawAccount?.id}
+      />
+
+      <TransferDialog
+        open={!!transferAccount}
+        onOpenChange={(v) => !v && setTransferAccount(null)}
+        defaultFromId={transferAccount?.id}
+      />
     </div>
   )
 }
 
 interface AccountCardProps {
-  account: AccountWithBalance
-  onEdit:    () => void
+  account:    AccountWithBalance
+  onEdit:     () => void
   onArchive?: () => void
+  onWithdraw?: () => void
+  onTransfer?: () => void
 }
 
-function AccountCard({ account, onEdit, onArchive }: AccountCardProps) {
+function AccountCard({ account, onEdit, onArchive, onWithdraw, onTransfer }: AccountCardProps) {
   const IconComponent = ICON_MAP[account.icon ?? 'wallet'] ?? Wallet
 
   return (
@@ -393,21 +414,43 @@ function AccountCard({ account, onEdit, onArchive }: AccountCardProps) {
       <hr className="border-0 border-t border-dashed border-mech-ink-20" />
 
       {/* Footer */}
-      <div className="flex items-center justify-end gap-3">
-        <button
-          onClick={onEdit}
-          className="flex items-center gap-1 font-grotesk text-xs text-mech-ink-50 hover:text-mech-dark transition-colors duration-instant"
-        >
-          <Edit2 size={12} strokeWidth={1.5} /> Edit
-        </button>
-        {onArchive && (
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          {onWithdraw && (
+            <button
+              onClick={onWithdraw}
+              className="flex items-center gap-1 font-grotesk text-xs text-mech-ink-50 hover:text-mech-dark transition-colors duration-instant"
+              title="Withdraw Cash"
+            >
+              <ArrowDownToLine size={12} strokeWidth={1.5} /> Withdraw
+            </button>
+          )}
+          {onTransfer && (
+            <button
+              onClick={onTransfer}
+              className="flex items-center gap-1 font-grotesk text-xs text-mech-ink-50 hover:text-mech-dark transition-colors duration-instant"
+              title="Transfer funds"
+            >
+              <ArrowLeftRight size={12} strokeWidth={1.5} /> Transfer
+            </button>
+          )}
+        </div>
+        <div className="flex items-center gap-3">
           <button
-            onClick={onArchive}
-            className="flex items-center gap-1 font-grotesk text-xs text-mech-ink-50 hover:text-mech-signal-red transition-colors duration-instant"
+            onClick={onEdit}
+            className="flex items-center gap-1 font-grotesk text-xs text-mech-ink-50 hover:text-mech-dark transition-colors duration-instant"
           >
-            <Archive size={12} strokeWidth={1.5} /> Archive
+            <Edit2 size={12} strokeWidth={1.5} /> Edit
           </button>
-        )}
+          {onArchive && (
+            <button
+              onClick={onArchive}
+              className="flex items-center gap-1 font-grotesk text-xs text-mech-ink-50 hover:text-mech-signal-red transition-colors duration-instant"
+            >
+              <Archive size={12} strokeWidth={1.5} /> Archive
+            </button>
+          )}
+        </div>
       </div>
     </div>
   )

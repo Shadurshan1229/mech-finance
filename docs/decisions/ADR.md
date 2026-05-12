@@ -34,3 +34,8 @@ Format: ## ADR-XXX — Title | Date | Status
 **Context:** Choosing data fetching and cache strategy. Considered Supabase Realtime subscriptions.
 **Decision:** TanStack Query v5 with manual invalidation on mutations.
 **Reason:** Single-user app — no need for realtime multi-user sync. Query invalidation gives instant UI updates after mutations with zero subscription overhead. No extra Supabase cost. Simpler mental model.
+
+## ADR-007 — Contextual transfer dialogs | 2026-05-12 | Accepted
+**Context:** Transfers between accounts/cards/goals could be one universal dialog or four contextual ones.
+**Decision:** Four separate contextual dialogs: WithdrawCash, Transfer, PayCard, FundGoal — triggered from the relevant Accounts or CreditCards card via a contextual button.
+**Reason:** Each dialog pre-fills the relevant source/destination, reducing user error. The four semantic variants (withdraw, transfer, pay card, fund goal) have different field requirements and mental models — one universal dialog would require complex conditional field logic and confuse the use case. Contextual triggers make the action discoverable where the user already is.
