@@ -2,11 +2,12 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import { format } from 'date-fns'
 import { toast } from 'sonner'
 import {
   Wallet, Plus, Edit2, Archive, RotateCcw,
   Building2, CreditCard as CardIcon, PiggyBank, Banknote, Landmark, Smartphone, Coins,
-  ArrowDownToLine, ArrowLeftRight,
+  ArrowDownToLine, ArrowLeftRight, ArrowRight,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
@@ -23,8 +24,10 @@ import {
 } from '@/components/ui/dialog'
 import { useAccounts } from '@/hooks/useAccounts'
 import type { AccountWithBalance } from '@/hooks/useAccounts'
-import { cn } from '@/lib/utils'
+import { useTransferHistory } from '@/hooks/useTransfers'
+import { cn, formatCurrency } from '@/lib/utils'
 import { ACCOUNT_TYPES } from '@/lib/constants'
+import type { TransferWithRefs } from '@/types'
 
 const ACCOUNT_ICONS: { value: string; label: string; icon: LucideIcon }[] = [
   { value: 'wallet',      label: 'Wallet',     icon: Wallet },
@@ -373,6 +376,8 @@ export default function Accounts() {
         onOpenChange={(v) => !v && setTransferAccount(null)}
         defaultFromId={transferAccount?.id}
       />
+
+      <TransferHistorySection />
     </div>
   )
 }
@@ -451,6 +456,76 @@ function AccountCard({ account, onEdit, onArchive, onWithdraw, onTransfer }: Acc
             </button>
           )}
         </div>
+      </div>
+    </div>
+  )
+}
+
+/** Compact transfer history section embedded in the Accounts page. */
+function TransferHistorySection() {
+  const { transfers, isLoading } = useTransferHistory()
+  const [expanded, setExpanded] = useState(false)
+
+  if (isLoading || transfers.length === 0) return null
+
+  const visible = expanded ? transfers : transfers.slice(0, 8)
+
+  return (
+    <div className="mt-10">
+      <div className="font-grotesk text-xs uppercase tracking-[0.10em] text-mech-ink-50 mb-3">
+        Transfer History
+      </div>
+
+      <div className="border border-mech-ink-20">
+        {/* Column headers */}
+        <div className="hidden md:grid grid-cols-[110px_140px_1fr_140px] gap-4 px-4 py-2 bg-mech-paper-secondary border-b border-mech-ink-20">
+          <span className="font-mono text-xs uppercase tracking-[0.08em] text-mech-ink-50">Date</span>
+          <span className="font-mono text-xs uppercase tracking-[0.08em] text-mech-ink-50">Type</span>
+          <span className="font-mono text-xs uppercase tracking-[0.08em] text-mech-ink-50">From → To</span>
+          <span className="font-mono text-xs uppercase tracking-[0.08em] text-mech-ink-50 text-right">Amount</span>
+        </div>
+
+        {visible.map((t) => (
+          <TransferItem key={t.id} transfer={t} />
+        ))}
+      </div>
+
+      {transfers.length > 8 && (
+        <button
+          onClick={() => setExpanded((v) => !v)}
+          className="mt-2 font-grotesk text-xs text-mech-ink-50 hover:text-mech-dark transition-colors duration-instant underline"
+        >
+          {expanded ? 'Show less' : `Show all ${transfers.length} transfers`}
+        </button>
+      )}
+    </div>
+  )
+}
+
+function TransferItem({ transfer: t }: { transfer: TransferWithRefs }) {
+  const fromLabel = t.from_account?.name ?? '—'
+  const toLabel   = t.to_account?.name ?? t.to_card?.name ?? t.to_goal?.name ?? '—'
+
+  let typeLabel = 'Transfer'
+  if (t.to_card_id)                  typeLabel = 'Card Payment'
+  else if (t.to_goal_id)             typeLabel = 'Goal Funding'
+  else if (t.to_account?.type === 'cash') typeLabel = 'Cash Withdrawal'
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-[110px_140px_1fr_140px] gap-1 md:gap-4 px-4 py-3 border-b border-mech-ink-20 last:border-b-0 hover:bg-mech-paper-secondary transition-colors duration-instant">
+      <div className="font-mono text-xs text-mech-ink-50">
+        {format(new Date(t.date), 'dd MMM yyyy')}
+      </div>
+      <div className="font-grotesk text-xs uppercase tracking-[0.06em] text-mech-ink-50">
+        {typeLabel}
+      </div>
+      <div className="flex items-center gap-1.5 min-w-0">
+        <span className="font-poppins text-sm text-mech-dark truncate">{fromLabel}</span>
+        <ArrowRight size={11} strokeWidth={1.5} className="text-mech-ink-30 flex-shrink-0" />
+        <span className="font-poppins text-sm text-mech-dark truncate">{toLabel}</span>
+      </div>
+      <div className="font-mono text-sm text-mech-dark md:text-right">
+        {formatCurrency(Number(t.amount))}
       </div>
     </div>
   )
