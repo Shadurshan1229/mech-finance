@@ -29,3 +29,8 @@ Format: ## ADR-XXX — Title | Date | Status
 **Context:** Should account balances be stored as a column or computed on the fly?
 **Decision:** Computed in hooks from raw transaction data. Only snapshots stored for history charts.
 **Reason:** Storing a balance column creates sync bugs whenever transactions are edited/deleted. Computed balance from source data is always accurate. Snapshots give historical data without the sync problem.
+
+## ADR-006 — TanStack Query for server state | 2026-05-10 | Accepted
+**Context:** Choosing data fetching and cache strategy. Considered Supabase Realtime subscriptions.
+**Decision:** TanStack Query v5 with manual invalidation on mutations.
+**Reason:** Single-user app — no need for realtime multi-user sync. Query invalidation gives instant UI updates after mutations with zero subscription overhead. No extra Supabase cost. Simpler mental model.

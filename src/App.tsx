@@ -27,20 +27,30 @@ const DEFAULT_INCOME_CATEGORIES = [
   { name: 'Other Income',       type: 'income', icon: 'plus-circle', color: '#7F8C8D' },
 ] as const
 
+// Deduplicates concurrent calls (React StrictMode double-invokes effects)
+const _seedingPromises = new Map<string, Promise<void>>()
+
 async function seedDefaultCategories(userId: string) {
-  const { count } = await supabase
-    .from('categories')
-    .select('*', { count: 'exact', head: true })
-    .eq('user_id', userId)
+  if (_seedingPromises.has(userId)) return _seedingPromises.get(userId)
 
-  if ((count ?? 0) > 0) return
+  const promise = (async () => {
+    const { count } = await supabase
+      .from('categories')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId)
 
-  const rows = [
-    ...DEFAULT_EXPENSE_CATEGORIES,
-    ...DEFAULT_INCOME_CATEGORIES,
-  ].map((c) => ({ ...c, user_id: userId, is_default: true }))
+    if ((count ?? 0) > 0) return
 
-  await supabase.from('categories').insert(rows)
+    const rows = [
+      ...DEFAULT_EXPENSE_CATEGORIES,
+      ...DEFAULT_INCOME_CATEGORIES,
+    ].map((c) => ({ ...c, user_id: userId, is_default: true }))
+
+    await supabase.from('categories').insert(rows)
+  })()
+
+  _seedingPromises.set(userId, promise)
+  try { await promise } finally { _seedingPromises.delete(userId) }
 }
 
 /** Root component — manages auth session, drives router and store. */

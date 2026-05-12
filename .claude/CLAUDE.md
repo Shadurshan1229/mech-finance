@@ -1,7 +1,71 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
 # MECH Finance — Claude Standing Instructions
 **Project:** MECH Finance | Personal Finance Manager
 **Repo:** https://github.com/Shadurshan1229/mech-finance
 **Stack:** React 19 + TypeScript + Vite + Tailwind v4 + shadcn/ui + Supabase + Recharts
+
+---
+
+## Development commands
+
+```bash
+npm run dev          # start dev server at localhost:5173
+npm run build        # tsc -b && vite build
+npm run preview      # preview production build
+npm test             # vitest (watch mode)
+npm run test:run     # vitest (single run, CI)
+npx tsc --noEmit     # type-check without emitting
+```
+
+**Environment** — copy `.env.example` to `.env.local` and fill in:
+```
+VITE_SUPABASE_URL=...
+VITE_SUPABASE_ANON_KEY=...
+```
+
+**Path alias** — `@/` resolves to `src/` (configured in `vite.config.ts`).
+
+---
+
+## Architecture overview
+
+### Data flow
+```
+Supabase DB
+  └─ src/hooks/         ← all queries & mutations live here
+       └─ components/   ← call hooks, never Supabase directly
+            └─ pages/   ← thin composition only, no business logic
+```
+Business logic (balance calc, goal progress, budget remaining, net worth) lives in `src/lib/utils.ts` pure functions — use those, don't recalculate inline.
+
+### Auth & session
+`App.tsx` initialises the Supabase auth listener, writes `user`/`sessionLoaded` to Zustand, and seeds default categories on first login. `AppLayout` blocks rendering until `sessionLoaded` is true, then redirects unauthenticated users to `/auth`.
+
+### Layout hierarchy
+```
+<RouterProvider>
+  /auth  →  <Auth>  (standalone)
+  *      →  <AppLayout>  (guards auth, waits for session)
+               └─ <Shell>
+                    ├─ <Topbar>
+                    ├─ <Sidebar>  (nav from NAV_GROUPS in constants.ts)
+                    └─ <Outlet>   (page content)
+```
+
+### Constants vs types
+- `src/types/index.ts` — TypeScript interfaces mirroring all 15 DB tables, plus join types (`TransactionWithRefs`, `BudgetWithCategory`)
+- `src/lib/constants.ts` — runtime arrays and nav config (`ACCOUNT_TYPES`, `NAV_GROUPS`, etc.) — pure TS, no React/Supabase imports
+
+### Supabase schema
+15 tables — all user-owned tables have RLS (`auth.uid() = user_id`). Migration at `supabase/migrations/001_initial_schema.sql`. Apply via Supabase Dashboard SQL Editor or `supabase db push`. For schema changes: update `docs/spec/DATABASE.md` first, then write a new numbered migration file.
+
+### Tests
+- Unit tests: `src/lib/__tests__/` — pure logic functions only (no React, no Supabase), run with `npm test`
+- Integration tests: `tests/` — Supabase CRUD + RLS, run with `npm run test:run`
+- Manual smoke test checklist: `docs/testing/TESTING.md`
 
 ---
 
