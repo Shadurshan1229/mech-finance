@@ -17,7 +17,7 @@ import { useRecurring } from '@/hooks/useRecurring'
 import { useCategories } from '@/hooks/useCategories'
 import { useAccounts } from '@/hooks/useAccounts'
 import { useCreditCards } from '@/hooks/useCreditCards'
-import { formatCurrency, normalizeToMonthly } from '@/lib/utils'
+import { formatCurrency } from '@/lib/utils'
 import { cn } from '@/lib/utils'
 import type { RecurringPayment } from '@/types'
 
@@ -29,7 +29,7 @@ const recurringSchema = z.object({
   category_id:    z.string().optional(),
   account_id:     z.string().optional(),
   credit_card_id: z.string().optional(),
-  auto_log:       z.boolean().default(false),
+  auto_log:       z.boolean(),
 })
 
 const confirmSchema = z.object({
@@ -38,7 +38,7 @@ const confirmSchema = z.object({
   account_id:      z.string().optional(),
   credit_card_id:  z.string().optional(),
   notes:           z.string().optional(),
-  updateRecurring: z.boolean().default(false),
+  updateRecurring: z.boolean(),
 })
 
 const skipSchema = z.object({
@@ -632,7 +632,6 @@ function SkipPaymentDialog({
   onSkip: (values: SkipFormValues) => Promise<void>
 }) {
   const { next_date, billing_cycle } = recurring
-  const { format: fmt, addMonths: am, addYears: ay, parseISO: pi } = { format, addMonths, addYears, parseISO: (s: string) => new Date(s) }
   const nextAdvanced = billing_cycle === 'yearly'
     ? format(addDays(new Date(next_date), 365), 'yyyy-MM-dd')
     : billing_cycle === 'quarterly'

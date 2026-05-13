@@ -49,7 +49,6 @@ export function useRecurring() {
   const userId = useAppStore((s) => s.user?.id)
   const qc     = useQueryClient()
   const today  = format(new Date(), 'yyyy-MM-dd')
-  const in7    = format(addMonths(new Date(), 0), 'yyyy-MM-dd') // computed below
 
   const query = useQuery({
     queryKey: ['recurring', userId],
@@ -190,7 +189,6 @@ export function useRecurring() {
   const paused   = all.filter((r) => r.status === 'paused')
   const archived = all.filter((r) => r.status === 'inactive')
 
-  const sevenDaysLater = format(addMonths(new Date(), 0), 'yyyy-MM-dd')
   // compute upcoming as next 7 calendar days
   const upcomingEnd = (() => {
     const d = new Date()

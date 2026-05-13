@@ -79,7 +79,7 @@ export function useDashboardCharts() {
         .order('created_at', { ascending: false })
         .limit(8)
       if (error) throw error
-      return (data ?? []) as RecentTransaction[]
+      return (data ?? []) as unknown as RecentTransaction[]
     },
   })
 
@@ -139,7 +139,7 @@ export function useDashboardCharts() {
   const categoryData = useMemo((): CategoryDonutData[] => {
     const groups: Record<string, CategoryDonutData> = {}
     ;(catRaw ?? []).forEach((t) => {
-      const cat  = t.category as { name: string; color: string } | null
+      const cat  = t.category as unknown as { name: string; color: string } | null
       const name  = cat?.name  ?? 'Uncategorized'
       const color = cat?.color ?? '#95A5A6'
       if (!groups[name]) groups[name] = { name, value: 0, color }
@@ -162,8 +162,6 @@ export function useDashboardCharts() {
     const latestLiab = new Map<string, number>()
     liabilities.forEach((s) => { if (!latestLiab.has(s.liability_id)) latestLiab.set(s.liability_id, Number(s.balance)) })
 
-    const totalAssets = Array.from(latestAsset.values()).reduce((s, v) => s + v, 0)
-    const totalLiabs  = Array.from(latestLiab.values()).reduce((s, v) => s + v, 0)
     const netWorth    = computeNetWorth([...latestAsset.values()], [...latestLiab.values()])
 
     // Last month net worth (snapshots from last month)

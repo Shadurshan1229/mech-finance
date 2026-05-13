@@ -13,7 +13,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog'
 import { useGoals } from '@/hooks/useGoals'
-import { formatCurrency, computeGoalProgress } from '@/lib/utils'
+import { formatCurrency } from '@/lib/utils'
 import { cn } from '@/lib/utils'
 import type { GoalWithProgress } from '@/hooks/useGoals'
 
