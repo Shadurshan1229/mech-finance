@@ -10,7 +10,7 @@ export const CATEGORY_TYPES = ['expense', 'income', 'both'] as const
 export const BILLING_CYCLES = ['monthly', 'quarterly', 'yearly'] as const
 export const CREDIT_DEBT_TYPES = ['i_owe', 'they_owe'] as const
 export const CREDIT_DEBT_STATUSES = ['pending', 'partial', 'settled'] as const
-export const RECURRING_STATUSES = ['active', 'inactive'] as const
+export const RECURRING_STATUSES = ['active', 'inactive', 'paused'] as const
 export const PORTFOLIO_ASSET_TYPES = [
   'cash', 'investment', 'property', 'vehicle', 'valuables', 'business', 'other',
 ] as const

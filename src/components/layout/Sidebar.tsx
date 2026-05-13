@@ -6,6 +6,7 @@ import {
   Handshake, Target, Repeat, TrendingUp, Settings, type LucideIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useRecurring } from '@/hooks/useRecurring'
 
 const ICON_MAP: Record<string, LucideIcon> = {
   'layout-dashboard': LayoutDashboard,
@@ -22,7 +23,8 @@ const ICON_MAP: Record<string, LucideIcon> = {
 
 /** App sidebar — full nav groups, active orange left border, MECH DS styled. */
 export default function Sidebar() {
-  const collapsed = useAppStore((s) => s.sidebarCollapsed)
+  const collapsed  = useAppStore((s) => s.sidebarCollapsed)
+  const { dueCount } = useRecurring()
 
   return (
     <aside
@@ -71,7 +73,12 @@ export default function Sidebar() {
                         />
                       )}
                       {!collapsed && (
-                        <span className="truncate">{item.label}</span>
+                        <span className="truncate flex-1">{item.label}</span>
+                      )}
+                      {item.path === '/recurring' && dueCount > 0 && (
+                        <span className="flex-shrink-0 w-4 h-4 bg-mech-orange flex items-center justify-center font-mono text-[10px] text-white leading-none">
+                          {dueCount > 9 ? '9+' : dueCount}
+                        </span>
                       )}
                     </>
                   )}

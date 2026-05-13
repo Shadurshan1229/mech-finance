@@ -5,7 +5,7 @@
 | 1 | Foundation | ✅ Done | v0.1.0 |
 | 2 | Core Data Entry | ✅ Done | v0.2.0 |
 | 3 | Financial Logic | ✅ Done | v0.3.0 |
-| 4 | Dashboard & Charts | ⏳ Planned | v0.4.0 |
+| 4 | Dashboard & Charts | ✅ Done | v0.4.0 |
 | 5 | Portfolio | ⏳ Planned | v0.5.0 |
 | 6 | AI & Polish | ⏳ Planned | v0.6.0 |
 

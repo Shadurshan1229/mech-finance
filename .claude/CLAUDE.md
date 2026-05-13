@@ -110,8 +110,8 @@ Business logic (balance calc, goal progress, budget remaining, net worth) lives 
 ---
 
 ## Current Active Phase
-**Phase 4 — Dashboard & Charts**
-See `docs/build/PHASES.md` for phase overview. Phase 3 is complete — see `docs/build/PHASE_3.md`.
+**Phase 5 — Portfolio**
+See `docs/build/PHASES.md` for phase overview. Phase 4 is complete — see `docs/build/PHASE_4.md`.
 
 ---
 
@@ -122,7 +122,7 @@ See `docs/build/PHASES.md` for phase overview. Phase 3 is complete — see `docs
 | DB schema | `docs/spec/DATABASE.md` |
 | Module features | `docs/spec/MODULES.md` |
 | Build phases | `docs/build/PHASES.md` |
-| Active phase tasks | `docs/build/PHASE_4.md` |
+| Active phase tasks | `docs/build/PHASE_5.md` |
 | Test strategy | `docs/testing/TESTING.md` |
 | Architecture decisions | `docs/decisions/ADR.md` |
 | Supabase client | `src/lib/supabase.ts` |

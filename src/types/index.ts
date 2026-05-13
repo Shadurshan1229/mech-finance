@@ -95,8 +95,16 @@ export interface RecurringPayment {
   category_id: string | null
   account_id: string | null
   credit_card_id: string | null
-  status: 'active' | 'inactive'
+  status: 'active' | 'inactive' | 'paused'
   auto_log: boolean
+  created_at: string
+}
+
+export interface RecurringSkip {
+  id: string
+  recurring_id: string
+  skipped_date: string
+  reason: string | null
   created_at: string
 }
 

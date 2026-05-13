@@ -77,6 +77,14 @@ export function normalizeToMonthly(
 /** @deprecated Use normalizeToMonthly */
 export const normalizeRecurringCost = normalizeToMonthly
 
+/** Formats a number with K/M abbreviation for chart axes. e.g. 12500 → "12.5K" */
+export function formatCurrencyAbbrev(value: number): string {
+  const abs = Math.abs(value)
+  if (abs >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`
+  if (abs >= 1_000)     return `${(value / 1_000).toFixed(1)}K`
+  return String(Math.round(value))
+}
+
 /** Computes net worth from asset values and liability balances. */
 export function computeNetWorth(
   assetValues: number[],
