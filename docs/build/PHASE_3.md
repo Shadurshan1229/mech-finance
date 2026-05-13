@@ -37,7 +37,7 @@
 
 ### Smoke test
 - [x] tsc --noEmit passes clean — zero errors
-- [ ] Full Phase 3 smoke test (manual)
-- [ ] git commit: feat: Phase 3 financial logic complete
-- [ ] git tag: v0.3.0
-- [ ] git push
+- [x] Full Phase 3 smoke test (manual) — confirmed by user, Supabase verified
+- [x] git commit: feat: Phase 3 financial logic complete — commit a778090
+- [x] git tag: v0.3.0
+- [x] git push — pushed to origin/main
